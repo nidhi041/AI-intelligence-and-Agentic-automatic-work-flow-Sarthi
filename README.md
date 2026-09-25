@@ -1,5 +1,8 @@
 # AI Candidate Intelligence & Agentic Hiring Assistant
 
+#Frontend: https://ai-intelligence-and-agentic-automat.vercel.app/
+#Backend : https://ai-intelligence-and-agentic-automatic.onrender.com/
+
 ## Overview
 
 A full-stack AI-powered recruitment assistant that demonstrates intelligent document analysis, recruiter Q&A, and automated agentic hiring evaluation — built as a working 24-hour MVP.

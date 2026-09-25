@@ -58,7 +58,7 @@ Mock HR Dispatch
 |---|---|
 | Frontend | React + Vite + Tailwind CSS + Lucide React |
 | Backend | Python + FastAPI + Pydantic |
-| AI | Google Gemini API using the Google GenAI Python SDK |
+| AI | Google Gemini API using the official Google GenAI Python SDK |
 | PDF | ReportLab |
 | Storage | Local filesystem / JSON |
 | Email | Mock (no real SMTP) |
@@ -151,19 +151,23 @@ Visit: http://localhost:5173
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` in the `backend/` directory:
+Copy `backend/.env.example` to `backend/.env`:
 
 ```bash
 cp backend/.env.example backend/.env
 ```
 
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
 | Variable | Description |
 |---|---|
-| `GEMINI_API_KEY` | Google Gemini API key. Stored strictly on the backend; never exposed to the frontend. |
+| `GEMINI_API_KEY` | Google Gemini API key. Used only by the FastAPI backend and must never be exposed to the frontend. |
 
-> **Security Note**: `GEMINI_API_KEY` is loaded and executed exclusively within the Python backend environment and must never be exposed to client-side code or the browser.
+> **Security Note**: `GEMINI_API_KEY` is used only by the FastAPI backend and must never be exposed to the frontend or browser client.
 
-If `GEMINI_API_KEY` is not configured, the application automatically runs in **Demo AI Mode** using deterministic mock responses. All application features remain fully functional without an API key.
+If `GEMINI_API_KEY` is not configured, the application runs in **Demo AI Mode** using deterministic mock responses. All application features remain fully functional without an API key.
 
 ## Demo Flow
 

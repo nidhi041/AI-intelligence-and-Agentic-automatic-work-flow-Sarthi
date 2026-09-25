@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import ValidationError
 
-# Add backend root to path
+
 sys.path.insert(0, str(Path(__file__).parent))
 
 from dotenv import load_dotenv
@@ -31,9 +31,7 @@ from models.schemas import (
 from services import activity_log as log_svc
 from services import ai_service, email_service, gap_analyzer, parser, pdf_service
 
-# --------------------------------------------------------------------------- #
-#  App setup
-# --------------------------------------------------------------------------- #
+
 
 app = FastAPI(
     title="AI Candidate Intelligence",
@@ -41,9 +39,25 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Configurable CORS: allow local development, Vercel deployments, and custom env origins
+default_origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+]
+env_origins = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", os.getenv("FRONTEND_URL", "")).split(",")
+    if origin.strip()
+]
+allowed_origins = list(dict.fromkeys(default_origins + env_origins))
+cors_origin_regex = os.getenv("CORS_ORIGIN_REGEX", r"https://.*\.vercel\.app")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"],
+    allow_origins=allowed_origins,
+    allow_origin_regex=cors_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -54,7 +68,7 @@ UPLOAD_DIR = Path(__file__).parent / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# In-memory current candidate (session state)
+
 _current_candidate: Optional[CandidateProfile] = None
 
 
@@ -65,9 +79,7 @@ def _get_candidate() -> CandidateProfile:
     return _current_candidate
 
 
-# --------------------------------------------------------------------------- #
-#  Routes
-# --------------------------------------------------------------------------- #
+
 
 @app.get("/")
 def root():
@@ -134,7 +146,7 @@ async def upload_resume(file: UploadFile = File(...)):
             detail=f"Unsupported file format: '{ext}'. Accepted formats: JSON, TXT.",
         )
 
-    # Save uploaded file
+   
     save_path = UPLOAD_DIR / (file.filename or "resume.json")
     content = await file.read()
 
@@ -144,7 +156,7 @@ async def upload_resume(file: UploadFile = File(...)):
     with open(save_path, "wb") as f:
         f.write(content)
 
-    # Parse
+  
     try:
         _current_candidate = parser.parse_resume(str(save_path))
     except ValueError as e:
@@ -198,14 +210,14 @@ def evaluate(request: EvaluateRequest):
     log_svc.add_event("agent_start", "AI Hiring Agent started", f"Target role: {request.target_role}")
 
     try:
-        # Step 1-3: Already done by parser and gap_analyzer
+        
         log_svc.add_event("agent_step", "Candidate information extracted")
         log_svc.add_event("agent_step", "Experience calculated")
 
         gaps = gap_analyzer.detect_gaps(candidate)
         log_svc.add_event("agent_step", f"Employment gaps identified: {len(gaps)} gap(s)")
 
-        # Step 4-6: AI evaluation
+        
         evaluation = ai_service.generate_evaluation(candidate, request.target_role)
         log_svc.add_event("agent_step", "Skills mapped to target role")
         log_svc.add_event("agent_eval", "Hiring evaluation generated")
@@ -234,7 +246,7 @@ def evaluate_and_dispatch(request: EvaluateRequest):
     log_svc.add_event("agent_start", "AI Hiring Agent started (full dispatch)", f"Target: {request.target_role}")
 
     try:
-        # Evaluation
+        
         log_svc.add_event("agent_step", "Extracting candidate information")
         log_svc.add_event("agent_step", "Validating extracted information")
         log_svc.add_event("agent_step", "Calculating documented experience")
@@ -247,11 +259,11 @@ def evaluate_and_dispatch(request: EvaluateRequest):
         log_svc.add_event("agent_eval", "Structured hiring evaluation generated")
         log_svc.add_event("agent_step", "Evaluation validated against schema")
 
-        # PDF
+        
         pdf_filename = pdf_service.generate_evaluation_pdf(evaluation)
         log_svc.add_event("pdf", f"PDF generated: {pdf_filename}")
 
-        # Mock dispatch
+       
         dispatch = email_service.simulate_dispatch(evaluation, pdf_filename)
         log_svc.add_event("dispatch", f"Mock HR dispatch completed → {dispatch['recipient']}")
 
@@ -273,7 +285,7 @@ def evaluate_and_dispatch(request: EvaluateRequest):
 @app.get("/download/{filename}")
 def download_file(filename: str):
     """Download a generated file (PDF or JSON)."""
-    # Security: only allow specific filenames from outputs dir
+    
     allowed = {"candidate_evaluation.pdf", "candidate_evaluation.json"}
     if filename not in allowed:
         raise HTTPException(status_code=400, detail="File not available for download.")

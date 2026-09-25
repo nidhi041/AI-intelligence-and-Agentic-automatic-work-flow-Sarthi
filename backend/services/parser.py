@@ -61,7 +61,7 @@ def _parse_txt(path: Path) -> CandidateProfile:
     if not content:
         raise ValueError("Resume contains no usable information.")
 
-    # Basic extraction via simple heuristics
+    
     lines = [line.strip() for line in content.split("\n") if line.strip()]
     name = lines[0] if lines else "Unknown"
 

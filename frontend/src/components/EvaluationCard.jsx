@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Download, FileText, Mail, CheckCircle2, AlertCircle } from 'lucide-react';
+import { api } from '../api/client';
 import DispatchModal from './DispatchModal';
 
 export default function EvaluationCard({ evaluation, pdfFile, dispatch, onDownloadJson, onSendToHR, candidateName }) {
@@ -114,7 +115,7 @@ export default function EvaluationCard({ evaluation, pdfFile, dispatch, onDownlo
       <div className="flex flex-wrap items-center gap-2 pt-2">
         {pdfFile && (
           <a
-            href={`/api/download/${pdfFile}`}
+            href={api.getDownloadUrl(pdfFile)}
             download={pdfFile}
             className="btn-secondary text-xs flex items-center gap-1.5"
             id="download-pdf-btn"

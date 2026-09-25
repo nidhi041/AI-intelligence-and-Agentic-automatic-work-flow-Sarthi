@@ -1,12 +1,19 @@
+
 /**
  * API client for the AI Candidate Intelligence backend.
- * All requests go through the Vite proxy at /api → localhost:8000
+ * Uses VITE_API_URL environment variable with fallback to local backend.
  */
 
-const BASE_URL = '/api';
+const RAW_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const BASE_URL = RAW_API_URL.replace(/\/+$/, '');
+
+function getUrl(path) {
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${BASE_URL}${cleanPath}`;
+}
 
 async function request(path, options = {}) {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(getUrl(path), {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   });
@@ -30,7 +37,7 @@ export const api = {
   uploadResume: async (file) => {
     const form = new FormData();
     form.append('file', file);
-    const res = await fetch(`${BASE_URL}/upload`, { method: 'POST', body: form });
+    const res = await fetch(getUrl('/upload'), { method: 'POST', body: form });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.detail || 'Upload failed');
     return data;
@@ -71,5 +78,6 @@ export const api = {
   getActivity: () => request('/activity'),
 
   /** Get download URL for a file */
-  getDownloadUrl: (filename) => `${BASE_URL}/download/${filename}`,
+  getDownloadUrl: (filename) => getUrl(`/download/${filename}`),
 };
+

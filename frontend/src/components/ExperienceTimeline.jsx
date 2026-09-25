@@ -8,7 +8,7 @@ function formatDate(dateStr) {
 }
 
 export default function ExperienceTimeline({ experience = [], gaps = [] }) {
-  // Build a merged timeline of experience + gaps
+  
   const allEvents = [];
 
   const sorted = [...experience].sort((a, b) =>
@@ -17,7 +17,7 @@ export default function ExperienceTimeline({ experience = [], gaps = [] }) {
 
   sorted.forEach((exp, i) => {
     allEvents.push({ type: 'job', data: exp });
-    // Check if there's a gap after this job
+    
     if (i < sorted.length - 1) {
       const relevantGap = gaps.find(g => {
         const gapStart = g.start;

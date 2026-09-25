@@ -58,10 +58,18 @@ Mock HR Dispatch
 |---|---|
 | Frontend | React + Vite + Tailwind CSS + Lucide React |
 | Backend | Python + FastAPI + Pydantic |
-| AI | OpenAI API (provider-agnostic layer) |
+| AI | Google Gemini API using the Google GenAI Python SDK |
 | PDF | ReportLab |
 | Storage | Local filesystem / JSON |
 | Email | Mock (no real SMTP) |
+
+## AI Provider
+
+Google Gemini powers the core intelligence workflows of the platform:
+- **Resume-grounded Q&A**: Answers recruiter inquiries strictly adhering to verified resume facts.
+- **Evidence extraction**: Extracts direct quotes and identifies exact resume sections supporting answers.
+- **Candidate evaluation**: Assesses qualifications, experience, and competencies against target roles.
+- **Structured evaluation generation**: Generates schema-compliant, validated JSON evaluation models.
 
 ## Project Structure
 
@@ -119,6 +127,15 @@ venv\Scripts\activate
 source venv/bin/activate
 
 pip install -r requirements.txt
+```
+
+Configure `backend/.env`:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+Start the backend server:
+```bash
 uvicorn main:app --reload
 ```
 
@@ -142,10 +159,11 @@ cp backend/.env.example backend/.env
 
 | Variable | Description |
 |---|---|
-| `OPENAI_API_KEY` | OpenAI API key. Leave blank for Demo Mode. |
-| `OPENAI_MODEL` | LLM model name (default: `gpt-4o-mini`) |
+| `GEMINI_API_KEY` | Google Gemini API key. Stored strictly on the backend; never exposed to the frontend. |
 
-If `OPENAI_API_KEY` is not set, the application runs in **Demo AI Mode** with deterministic mock responses. All features work — no configuration required.
+> **Security Note**: `GEMINI_API_KEY` is loaded and executed exclusively within the Python backend environment and must never be exposed to client-side code or the browser.
+
+If `GEMINI_API_KEY` is not configured, the application automatically runs in **Demo AI Mode** using deterministic mock responses. All application features remain fully functional without an API key.
 
 ## Demo Flow
 

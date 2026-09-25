@@ -1,0 +1,160 @@
+"""
+PDF generation service using ReportLab.
+Generates a professional Corporate Hiring Evaluation Form.
+"""
+
+import os
+from datetime import datetime
+from pathlib import Path
+from typing import List
+
+from models.schemas import CandidateEvaluation
+
+OUTPUT_DIR = Path(__file__).parent.parent / "outputs"
+
+
+def _ensure_output_dir() -> Path:
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    return OUTPUT_DIR
+
+
+def generate_evaluation_pdf(evaluation: CandidateEvaluation) -> str:
+    """
+    Generate a PDF evaluation form for the candidate.
+    Returns the filename of the generated PDF.
+    """
+    try:
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import mm
+        from reportlab.platypus import (
+            SimpleDocTemplate,
+            Paragraph,
+            Spacer,
+            Table,
+            TableStyle,
+            HRFlowable,
+        )
+        from reportlab.lib.enums import TA_LEFT, TA_CENTER
+    except ImportError:
+        raise RuntimeError("reportlab not installed. Run: pip install reportlab")
+
+    out_dir = _ensure_output_dir()
+    filename = "candidate_evaluation.pdf"
+    filepath = out_dir / filename
+
+    doc = SimpleDocTemplate(
+        str(filepath),
+        pagesize=A4,
+        topMargin=20 * mm,
+        bottomMargin=20 * mm,
+        leftMargin=20 * mm,
+        rightMargin=20 * mm,
+    )
+
+    styles = getSampleStyleSheet()
+
+    # Custom styles
+    title_style = ParagraphStyle(
+        "CustomTitle",
+        parent=styles["Title"],
+        fontSize=18,
+        textColor=colors.HexColor("#1e293b"),
+        spaceAfter=4,
+        fontName="Helvetica-Bold",
+    )
+    subtitle_style = ParagraphStyle(
+        "Subtitle",
+        parent=styles["Normal"],
+        fontSize=10,
+        textColor=colors.HexColor("#64748b"),
+        spaceAfter=2,
+    )
+    section_style = ParagraphStyle(
+        "Section",
+        parent=styles["Heading2"],
+        fontSize=11,
+        textColor=colors.HexColor("#3b82f6"),
+        spaceBefore=12,
+        spaceAfter=4,
+        fontName="Helvetica-Bold",
+    )
+    body_style = ParagraphStyle(
+        "Body",
+        parent=styles["Normal"],
+        fontSize=9,
+        textColor=colors.HexColor("#374151"),
+        spaceAfter=3,
+        leading=14,
+    )
+    label_style = ParagraphStyle(
+        "Label",
+        parent=styles["Normal"],
+        fontSize=9,
+        textColor=colors.HexColor("#64748b"),
+        fontName="Helvetica-Bold",
+    )
+
+    story = []
+
+    # Header
+    story.append(Paragraph("CORPORATE HIRING EVALUATION FORM", title_style))
+    story.append(Paragraph("AI Candidate Intelligence System", subtitle_style))
+    story.append(Paragraph(f"Generated: {datetime.now().strftime('%B %d, %Y at %H:%M')}", subtitle_style))
+    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#e2e8f0"), spaceAfter=10))
+
+    def add_field(label: str, value: str):
+        story.append(Paragraph(label, label_style))
+        story.append(Paragraph(value or "Not provided in resume.", body_style))
+
+    def add_list(label: str, items: List[str]):
+        story.append(Paragraph(label, label_style))
+        if items:
+            for item in items:
+                story.append(Paragraph(f"• {item}", body_style))
+        else:
+            story.append(Paragraph("None identified.", body_style))
+
+    # Candidate Information
+    story.append(Paragraph("CANDIDATE INFORMATION", section_style))
+    add_field("Full Name", evaluation.candidate_name)
+    add_field("Email Address", evaluation.email)
+
+    # Experience
+    story.append(Paragraph("EXPERIENCE SUMMARY", section_style))
+    add_field("Total Documented Experience", f"{evaluation.years_of_experience} years")
+    add_list("Relevant Experience", evaluation.relevant_experience)
+
+    # Skills
+    story.append(Paragraph("SKILLS ASSESSMENT", section_style))
+    add_field("Primary Skillset", ", ".join(evaluation.primary_skillset))
+    add_field("Cloud Experience", evaluation.cloud_experience)
+
+    # Employment Gaps
+    story.append(Paragraph("EMPLOYMENT CONTINUITY", section_style))
+    add_list("Undocumented Periods", evaluation.employment_gaps)
+
+    # Risk Factors
+    story.append(Paragraph("RISK FACTORS & RED FLAGS", section_style))
+    add_list("Red Flags", evaluation.red_flags)
+
+    # Recommendation
+    story.append(Paragraph("HIRING RECOMMENDATION", section_style))
+    add_field("Recommended Role", evaluation.recommended_role)
+    add_field("Recommendation Reason", evaluation.recommendation_reason)
+    add_field("Confidence Level", evaluation.confidence)
+
+    # Footer
+    story.append(Spacer(1, 15))
+    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#e2e8f0")))
+    story.append(Spacer(1, 5))
+    story.append(Paragraph(
+        "This evaluation was generated by the AI Candidate Intelligence system. "
+        "All information is sourced exclusively from the supplied resume. "
+        "Employment gaps are identified from documented dates only and no reason is assumed.",
+        subtitle_style,
+    ))
+
+    doc.build(story)
+    return filename

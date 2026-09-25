@@ -1,0 +1,55 @@
+{
+  "name": "Aarav Mehta",
+  "email": "aarav.mehta@example.com",
+  "phone": "+91-9876543210",
+  "location": "Gurugram, India",
+  "summary": "Software engineer with experience in backend development, APIs and cloud-based applications.",
+  "education": [
+    {
+      "degree": "B.Tech Computer Science",
+      "institution": "Delhi Technological University",
+      "start": "2017",
+      "end": "2021"
+    }
+  ],
+  "experience": [
+    {
+      "company": "TechNova Solutions",
+      "title": "Backend Engineer",
+      "start": "2021-07",
+      "end": "2023-08",
+      "responsibilities": [
+        "Developed REST APIs using Python and FastAPI",
+        "Worked with PostgreSQL",
+        "Built authentication systems using JWT"
+      ]
+    },
+    {
+      "company": "CloudPeak Labs",
+      "title": "Platform Developer",
+      "start": "2025-01",
+      "end": "2026-06",
+      "responsibilities": [
+        "Developed microservices",
+        "Deployed applications using Docker",
+        "Worked with AWS EC2 and S3",
+        "Created CI/CD workflows"
+      ]
+    }
+  ],
+  "skills": [
+    "Python",
+    "FastAPI",
+    "REST APIs",
+    "PostgreSQL",
+    "Docker",
+    "AWS",
+    "GitHub Actions",
+    "JWT",
+    "Microservices"
+  ],
+  "certifications": [
+    "AWS Cloud Practitioner"
+  ],
+  "note": "The candidate does not explicitly explain the period between August 2023 and January 2025."
+}

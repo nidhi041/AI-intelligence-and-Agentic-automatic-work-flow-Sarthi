@@ -33,7 +33,7 @@ An AI-native recruiter dashboard that:
 - **JSON download** — structured evaluation export
 - **Mock HR dispatch** — simulated email to hr-admissions@company.mock
 - **Activity log** — complete workflow event history
-- **Demo mode** — fully functional without an API key
+- **Demo mode** — fully functional with a Gemini API key
 
 ## Architecture
 
